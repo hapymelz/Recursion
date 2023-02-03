@@ -54,12 +54,12 @@ public class TreeTester {
         Integer[] list4= {21, 8, 25, 6, 7, 19, 10, 40, 43, 52, 64, 80};
         Tree<Integer> treeFour = new Tree<Integer>(list4, "treeFour", false);
         //Problem 6
-        treeFour.pruneK(60);
+//        treeFour.pruneK(60, 0);
         treeFour.changeName("treeFour after pruning 60");
         System.out.println(treeFour.toString());
 
         System.out.println(treeTwo.toString());
-        treeTwo.pruneK(290);
+//        treeTwo.pruneK(290, 0);
         treeTwo.changeName("treeTwo after pruning 290");
         System.out.println(treeTwo.toString());
 
@@ -105,7 +105,7 @@ public class TreeTester {
         Integer[] inorder = {4, 2, 1, 7, 5, 8, 3, 6};
         Integer[] preorder = {1, 2, 4, 3, 5, 7, 8, 6};
         Tree<Integer> treeBonus = new Tree<Integer>("TreeBonus");
-        treeBonus.buildTreeTraversals(inorder, preorder);
+        treeBonus.buildTreeTraversals(treeBonus.root, inorder, preorder);
         treeBonus.changeName("TreeBonus built from inorder and preorder traversals");
         System.out.println(treeBonus.toString());
 

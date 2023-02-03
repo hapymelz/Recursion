@@ -1,6 +1,7 @@
 // ******************ERRORS********************************
 // Throws UnderflowException as appropriate
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -121,16 +122,14 @@ public class Tree<E extends Comparable<? super E>> {
      * This routine runs in O(n^2), because you go through the tree once to load
      * values into the array, then again when you go through the array to load the values into the string.
      *
-     * @param t the node that roots the subtree.
      */
-    ArrayList<E> nodeArr = new ArrayList<>();
     public String toStringReverse() {
-        if (!nodeArr.isEmpty()) {
-            nodeArr.clear();
-        }
-        loadArr(root);
+        ArrayList<E> nodeArr =  loadArr(root, new ArrayList<E>());
         nodeArr.sort(Comparator.reverseOrder());
         String order = "";
+        for (E item : nodeArr) {
+            System.out.print(item + ", ");
+        }
 
         for (E item : nodeArr) {
             int numSpaces = getHeight(item, 0, root);
@@ -140,23 +139,21 @@ public class Tree<E extends Comparable<? super E>> {
             }
             order = order + spaces + item + "\n";
         }
-        return order;
+        return treeName + "\n" + order;
     }
     private int getHeight(E node, int height, BinaryNode<E> currNode) {
-        if (currNode == null) {
-            return 0;
-        }
-        if (currNode.element.compareTo(node) == 0) {
-            return height;
-        }
+        if (currNode == null) { return 0; }
+        if (currNode.element.compareTo(node) == 0) { return height; }
         return getHeight(node, height + 1, currNode.left) + getHeight(node, height + 1, currNode.right);
 
     }
-    private void loadArr(BinaryNode<E> node) {
-        if (node == null) { return; }
+    private ArrayList<E> loadArr(BinaryNode<E> node, ArrayList<E> nodeArr) {
+        if (node == null) { return nodeArr; }
         nodeArr.add(node.element);
-        loadArr(node.left);
-        loadArr(node.right);
+        nodeArr = loadArr(node.left, nodeArr);
+        nodeArr = loadArr(node.right, nodeArr);
+
+        return nodeArr;
     }
 
 
@@ -196,23 +193,26 @@ public class Tree<E extends Comparable<? super E>> {
      * The complexity of finding the deepest node is O(n)
      * @return
      */
-    private BinaryNode<E> deepestNode = root;
-    private int maxHeight = 0;
     public E deepestNode() {
-        getDeepest(root, 0);
+        BinaryNode<E> deepestNode =  getDeepest(root, 0, null, 0);
         return deepestNode.element;
     }
-    public void getDeepest(BinaryNode<E> node, int height) {
-        if (root == null) { return; }
-        if (node == null) { return; }
-        getDeepest(node.left, height + 1 );
+    public BinaryNode<E> getDeepest(BinaryNode<E> node, int height, BinaryNode<E> deepestNode, int maxHeight) {
+        if (root == null) { return deepestNode; }
+        if (node == null) { return deepestNode; }
 
         if (height > maxHeight) {
             deepestNode = node;
             maxHeight = height;
         }
-        getDeepest(node.right, height + 1);
 
+        BinaryNode<E> left =  getDeepest(node.left, height + 1, deepestNode, maxHeight );
+        BinaryNode<E> right =  getDeepest(node.right, height + 1, deepestNode, maxHeight);
+
+        if (getHeight(left.element, 0, root) >= getHeight(right.element, 0, root)) {
+            return left;
+        }
+        return right;
     }
 
 
@@ -265,11 +265,15 @@ public class Tree<E extends Comparable<? super E>> {
      * Remove all paths from tree that sum to less than given value
      * @param sum: minimum path sum allowed in final tree
      */
-    public void pruneK(BinaryNode<E> node, Integer sum) {
-        if (node == null) { return; }
+    public BinaryNode<E> pruneK(BinaryNode<E> node, E k, E sum) {
+        if (node == null) { return null; }
+
+
+        int leftSum = sum + node.element;
 
 
     }
+
 
 
 
@@ -313,42 +317,30 @@ public class Tree<E extends Comparable<? super E>> {
     /** Program 8
      * Balance the tree
      */
-    ArrayList<E> nodes = new ArrayList<>();
     public void balanceTree() {
-        if (!nodes.isEmpty()) {
-            nodes.clear();
-        }
-
-        loadNodes(root);
+        ArrayList<E> nodes =  loadArr(root, new ArrayList<E>());
 
         nodes.sort(Comparator.naturalOrder());
         for (E item : nodes) {
             System.out.println(item);
         }
 
-
         root = new BinaryNode<E>(nodes.get(nodes.size() / 2));
 
-        root.left = balance(0, nodes.size() / 2 - 1);
-        root.right = balance(nodes.size() / 2 + 1, nodes.size() - 1);
+        root.left = balance(0, nodes.size() / 2 - 1, nodes);
+        root.right = balance(nodes.size() / 2 + 1, nodes.size() - 1, nodes);
     }
 
-    private void loadNodes(BinaryNode<E> node) {
-        if (node == null) { return; }
-        nodes.add(node.element);
-        loadNodes(node.left);
-        loadNodes(node.right);
-    }
-
-    private BinaryNode<E> balance(int start, int end) {
+    private BinaryNode<E> balance(int start, int end, ArrayList<E> nodes) {
         if (start > end) {
             return null;
         }
-        int mid = (start + end) / 2;
-        BinaryNode<E> node = new BinaryNode<E>(nodes.get(mid));
 
-        node.left = balance(start, mid - 1);
-        node.right = balance(mid + 1, end);
+        int mid = (start + end) / 2;
+        BinaryNode<E> node = new BinaryNode<>(nodes.get(mid));
+
+        node.left = balance(start, mid - 1, nodes);
+        node.right = balance(mid + 1, end, nodes);
 
         return node;
     }
