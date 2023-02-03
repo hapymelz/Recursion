@@ -1,7 +1,8 @@
 // ******************ERRORS********************************
 // Throws UnderflowException as appropriate
 
-//testing github
+import java.util.ArrayList;
+import java.util.Comparator;
 
 class UnderflowException extends RuntimeException {
     /**
@@ -15,7 +16,7 @@ class UnderflowException extends RuntimeException {
 }
 
 public class Tree<E extends Comparable<? super E>> {
-    private BinaryNode<E> root;  // Root of tree
+    public BinaryNode<E> root;  // Root of tree
     private String treeName;     // Name of tree
 
     /**
@@ -66,15 +67,31 @@ public class Tree<E extends Comparable<? super E>> {
         this.treeName = name;
     }
 
+
+
+
     /**
      * Return a string displaying the tree contents as a single line
      */
     public String toString() {
         if (root == null)
             return treeName + " Empty tree";
-        else
-            return treeName + " Please write the code to print me";
+
+        return treeName + "\n" + printTree(root, 0);
     }
+    public String printTree(BinaryNode<E> node, int height) {
+        if (node == null) {
+            return "";
+        }
+
+        String spaces = "";
+        for (int i = 0; i <= (4 - height); i++) {
+            spaces += " ";
+        }
+        return spaces + node.element + "(" + height + ")\n" + printTree(node.left, height + 1) + printTree(node.right, height + 1);
+    }
+
+
     /**
      * Return a string displaying the tree contents as a single line
      */
@@ -85,12 +102,6 @@ public class Tree<E extends Comparable<? super E>> {
             return treeName + " " + toString2(root);
     }
 
-    /**
-     * Internal method to return a string of items in the tree in order
-     * This routine runs in O(??)
-     *
-     * @param t the node that roots the subtree.
-     */
     private String toString2(BinaryNode<E> t) {
         if (t == null) return "";
         StringBuilder sb = new StringBuilder();
@@ -101,49 +112,425 @@ public class Tree<E extends Comparable<? super E>> {
     }
 
 
-    /**
-     * The complexity of finding the deepest node is O(???)
-     * @return
+
+
+
+
+    /** Program 1
+     * Internal method to return a string of items in the tree in order
+     * This routine runs in O(n^2), because you go through the tree once to load
+     * values into the array, then again when you go through the array to load the values into the string.
+     *
+     * @param t the node that roots the subtree.
      */
-    public E deepestNode() {
-        return null;
+    ArrayList<E> nodeArr = new ArrayList<>();
+    public String toStringReverse() {
+        if (!nodeArr.isEmpty()) {
+            nodeArr.clear();
+        }
+        loadArr(root);
+        nodeArr.sort(Comparator.reverseOrder());
+        String order = "";
+
+        for (E item : nodeArr) {
+            int numSpaces = getHeight(item, 0, root);
+            String spaces = "";
+            for (int i = 0; i < numSpaces; i++) {
+                spaces = spaces + " ";
+            }
+            order = order + spaces + item + "\n";
+        }
+        return order;
+    }
+    private int getHeight(E node, int height, BinaryNode<E> currNode) {
+        if (currNode == null) {
+            return 0;
+        }
+        if (currNode.element.compareTo(node) == 0) {
+            return height;
+        }
+        return getHeight(node, height + 1, currNode.left) + getHeight(node, height + 1, currNode.right);
+
+    }
+    private void loadArr(BinaryNode<E> node) {
+        if (node == null) { return; }
+        nodeArr.add(node.element);
+        loadArr(node.left);
+        loadArr(node.right);
     }
 
-    /**
-     * The complexity of finding the flip is O(???)
+
+
+
+
+    /** Program 2
+     * The complexity of finding the flip is O(n)
      * reverse left and right children recursively
      */
-    public void flip() {
-        //flip(root);
+    public void flip(BinaryNode<E> node) {
+        if (node.right == null && node.left == null) {
+            return;
+        }
+        if (node.left == null) {
+            node.left = node.right;
+            node.right = null;
+            return;
+        }
+        if (node.right == null) {
+            node.right = node.left;
+            node.left = null;
+            return;
+        }
+        flip(node.left);
+        flip(node.right);
+        BinaryNode<E> temp = node.left;
+        node.left = node.right;
+        node.right = temp;
     }
 
-    /**
+
+
+
+
+    /** Program 3
+     * The complexity of finding the deepest node is O(n)
+     * @return
+     */
+    private BinaryNode<E> deepestNode = root;
+    private int maxHeight = 0;
+    public E deepestNode() {
+        getDeepest(root, 0);
+        return deepestNode.element;
+    }
+    public void getDeepest(BinaryNode<E> node, int height) {
+        if (root == null) { return; }
+        if (node == null) { return; }
+        getDeepest(node.left, height + 1 );
+
+        if (height > maxHeight) {
+            deepestNode = node;
+            maxHeight = height;
+        }
+        getDeepest(node.right, height + 1);
+
+    }
+
+
+
+
+
+    /** Program 4
      * Counts number of nodes in specified level
-     * The complexity of nodesInLevel is O(???)
+     * The complexity of nodesInLevel is O(n)
      * @param level Level in tree, root is zero
      * @return count of number of nodes at specified level
      */
-    public int nodesInLevel(int level) {
-        return 0;
+    public int nodesInLevel(int level, BinaryNode<E> node, int nodeLevel) {
+        if (node == null) {
+            return 0;
+        }
+        if (nodeLevel == level) {
+            return 1;
+        }
+
+        return nodesInLevel(level, node.left, nodeLevel + 1) + nodesInLevel(level, node.right, nodeLevel + 1);
     }
 
-    /**
+
+
+
+
+
+    /** Program 5
      * Print all paths from root to leaves
      * The complexity of printAllPaths is O(???)
      */
-    public void printAllPaths() {
+    public void printAllPaths(BinaryNode<Integer> node, String path) {
+        if (root == null) { return; }
+        if (node == null) { return; }
+        if (node.left == null && node.right == null) {
+            System.out.print(path + node.element + "\n");
+            return;
+        }
+        printAllPaths(node.left, path + node.element + " ");
+        printAllPaths(node.right, path + node.element + " ");
+    }
+
+
+
+
+
+
+    /** Program 6
+     * Remove all paths from tree that sum to less than given value
+     * @param sum: minimum path sum allowed in final tree
+     */
+    public void pruneK(BinaryNode<E> node, Integer sum) {
+        if (node == null) { return; }
+
 
     }
 
 
-    /**
+
+
+
+
+
+
+    /** Program 7
+     * Find the least common ancestor of two nodes
+     * @param a first node
+     * @param b second node
+     * Complexity is O(n)
+     * @return String representation of ancestor
+     */
+    public E lca(BinaryNode<E> node, E a, E b) {
+        if (node == null) { return null;}
+        if (!contains(a) || !contains(b)) {
+            return null;
+        }
+        if (a.compareTo(node.element) == 0 || b.compareTo(node.element) == 0) { return node.element; }
+        E left = lca(node.left, a, b);
+        E right = lca(node.right, a, b);
+        if (left == null) {
+            return right;
+        }
+        else if (right == null) {
+            return left;
+        }
+        else {
+            return node.element;
+        }
+    }
+
+
+
+
+
+
+
+    /** Program 8
+     * Balance the tree
+     */
+    ArrayList<E> nodes = new ArrayList<>();
+    public void balanceTree() {
+        if (!nodes.isEmpty()) {
+            nodes.clear();
+        }
+
+        loadNodes(root);
+
+        nodes.sort(Comparator.naturalOrder());
+        for (E item : nodes) {
+            System.out.println(item);
+        }
+
+
+        root = new BinaryNode<E>(nodes.get(nodes.size() / 2));
+
+        root.left = balance(0, nodes.size() / 2 - 1);
+        root.right = balance(nodes.size() / 2 + 1, nodes.size() - 1);
+    }
+
+    private void loadNodes(BinaryNode<E> node) {
+        if (node == null) { return; }
+        nodes.add(node.element);
+        loadNodes(node.left);
+        loadNodes(node.right);
+    }
+
+    private BinaryNode<E> balance(int start, int end) {
+        if (start > end) {
+            return null;
+        }
+        int mid = (start + end) / 2;
+        BinaryNode<E> node = new BinaryNode<E>(nodes.get(mid));
+
+        node.left = balance(start, mid - 1);
+        node.right = balance(mid + 1, end);
+
+        return node;
+    }
+
+
+
+
+
+
+
+    /** Program 9
+     * In a BST, keep only nodes between range
+     *
+     * @param a lowest value
+     * @param b highest value
+     */
+    public void keepRange(E a, E b) {
+        if (root == null) { return; }
+        if (root.left == null) { return; }
+
+        if (root.element.compareTo(a) <= 0) {
+            root = root.right;
+        }
+        while (root.left.element.compareTo(a) <= 0) {
+            root.left = root.left.right;
+        }
+        keepRange(a, b, root.left);
+
+
+        if (root.right == null) { return; }
+        if (root.element.compareTo(b) >= 0) {
+            root = root.left;
+        }
+        while (root.right.element.compareTo(b) >= 0) {
+            root.right = root.right.left;
+        }
+        keepRange(a, b, root.right);
+
+    }
+
+    public void keepRange(E a, E b, BinaryNode<E> node) {
+        if (node == null) { return; }
+        if (node.left != null) {
+            while (node.left != null && node.left.element.compareTo(a) <= 0) {
+                if (node.left.right != null) {
+                    node.left = root.left.right;
+                }
+                else if (node.right.left != null) {
+                    node.left = node.right.left;
+                }
+                else {
+                    node.right = null;
+                    node.left = null;
+                }
+            }
+            keepRange(a, b, node.left);
+        }
+
+
+        if (node.right != null) {
+            while (node.right != null && node.right.element.compareTo(b) >= 0) {
+                if (node.right.left != null) {
+                    node.right = node.right.left;
+                }
+                else if (node.left != null && node.left.right != null) {
+                    node.right = node.left.right;
+                }
+                else {
+                    node.right = null;
+                    node.left = null;
+                }
+            }
+            keepRange(a, b, node.right);
+        }
+    }
+
+
+
+
+
+
+
+
+    /** Program 10
      * Counts all non-null binary search trees embedded in tree
-     *  The complexity of countBST is O(???)
+     *  The complexity of countBST is O(n)
      * @return Count of embedded binary search trees
      */
-    public Integer countBST() {
-        if (root == null) return 0;
-        return -1;
+    public int countBST(BinaryNode<E> node) {
+//        BSTrees bst = countBSTrees();
+//        return bst.bstNum;
+        if (root == null) { return 0;}
+        if (node.left == null && node.right == null) { return 1;}
+
+        if (node.left == null && node.right != null) {
+            if (node.right.element.compareTo(node.element) > 0) {
+                return 1 + countBST(node.right);
+            }
+        }
+
+        else if (node.right == null && node.left != null) {
+            if (node.left.element.compareTo(node.element) < 0) {
+                return 1 + countBST(node.left);
+            }
+        }
+        else if (node.left != null && node.right != null) {
+            if (node.left.element.compareTo(node.element) < 0 && node.right.element.compareTo(node.element) > 0) {
+                return 1 + countBST(node.left) + countBST(node.right);
+            }
+        }
+
+        return countBST(node.left) + countBST(node.right);
+    }
+
+    static class BSTrees {
+        int bstNum;
+        int bstMax;
+        int bstMin;
+        boolean isBST;
+
+        BSTrees(int num, int max, int min, boolean bst) {
+            bstNum = num;
+            bstMax = max;
+            bstMin = min;
+            isBST = bst;
+        }
+    }
+
+//    public BSTrees countBSTrees() {
+//        if (root == null)
+//
+//
+//
+//        return bst;
+//    }
+
+
+
+
+
+
+    /** Program 11
+     * Build tree given inOrder and preOrder traversals.  Each value is unique
+     * @param inOrder  List of tree nodes in inorder
+     * @param preOrder List of tree nodes in preorder
+     */
+    public void buildTreeTraversals(BinaryNode<E> node, E[] inOrder, E[] preOrder) {
+        if (node == null) { return; }
+
+    }
+
+
+
+
+
+
+
+    // Basic node stored in unbalanced binary  trees
+    private static class BinaryNode<E> {
+        E element;            // The data in the node
+        BinaryNode<E> left;   // Left child
+        BinaryNode<E> right;  // Right child
+
+        // Constructors
+        BinaryNode(E theElement) {
+            this(theElement, null, null);
+        }
+
+        BinaryNode(E theElement, BinaryNode<E> lt, BinaryNode<E> rt) {
+            element = theElement;
+            left = lt;
+            right = rt;
+        }
+
+        // toString for BinaryNode
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Node:");
+            sb.append(element);
+            return sb.toString();
+        }
+
     }
 
     /**
@@ -206,81 +593,6 @@ public class Tree<E extends Comparable<? super E>> {
         else {
             return true;    // Match
         }
-    }
-    /**
-     * Remove all paths from tree that sum to less than given value
-     * @param sum: minimum path sum allowed in final tree
-     */
-    public void pruneK(Integer sum) {
-    }
-
-    /**
-     * Build tree given inOrder and preOrder traversals.  Each value is unique
-     * @param inOrder  List of tree nodes in inorder
-     * @param preOrder List of tree nodes in preorder
-     */
-    public void buildTreeTraversals(E[] inOrder, E[] preOrder) {
-        root = null;
-    }
-
-    /**
-     * Find the least common ancestor of two nodes
-     * @param a first node
-     * @param b second node
-     * @return String representation of ancestor
-     */
-    public String lca(E a, E b) {
-        BinaryNode<E> ancestor = null;
-//        if (a.compareTo(b) < 0) {
-//            ancestor = lca(root, a, b);
-//        } else {
-//            ancestor = lca(root, b, a);
-//        }
-        if (ancestor == null) return "none";
-        else return ancestor.toString();
-    }
-
-    /**
-     * Balance the tree
-     */
-    public void balanceTree() {
-        //root = balanceTree(root);
-    }
-
-    /**
-     * In a BST, keep only nodes between range
-     *
-     * @param a lowest value
-     * @param b highest value
-     */
-    public void keepRange(E a, E b) {
-    }
-
-    // Basic node stored in unbalanced binary  trees
-    private static class BinaryNode<E> {
-        E element;            // The data in the node
-        BinaryNode<E> left;   // Left child
-        BinaryNode<E> right;  // Right child
-
-        // Constructors
-        BinaryNode(E theElement) {
-            this(theElement, null, null);
-        }
-
-        BinaryNode(E theElement, BinaryNode<E> lt, BinaryNode<E> rt) {
-            element = theElement;
-            left = lt;
-            right = rt;
-        }
-
-        // toString for BinaryNode
-        public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Node:");
-            sb.append(element);
-            return sb.toString();
-        }
-
     }
 
 }

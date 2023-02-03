@@ -13,24 +13,27 @@ public class TreeTester {
 
         //Problem 1
         //System.out.println(treeOne.toString());  Print so it looks like a tree
-        System.out.println(treeOne.toString2());
+        System.out.println(treeOne.toString());
+        System.out.println(treeOne.toStringReverse());
 
         Integer[] list2 = {4,5,6,8,33,16,80,121,22,25, 36};
         Tree<Integer> treeTwo = new Tree<Integer>(list2, "TreeTwo:", false);
         System.out.println(treeTwo.toString());
 
         //Problem 2
-        treeTwo.flip();
+        treeTwo.flip(treeTwo.root);
         treeTwo.changeName("Tree Two Now flipped");
         System.out.println( treeTwo.toString());
-        treeTwo.flip();   //Flip back
+        treeTwo.flip(treeTwo.root);   //Flip back
         treeTwo.changeName("TreeTwo");
         System.out.println(treeTwo.toString());
 
         final int SIZE = 10;
         Integer[] list3 = {111, 176, 67, 77, 112, 119, 120, 70, 92, 153};
         Tree<Integer> treeThree = new Tree<Integer>(list3, "TreeThree:", true);
+        System.out.println(treeThree.toString2());
         System.out.println(treeThree.toString());
+
 
         //Problem 3
         System.out.println("Deepest Node of treeOne " + treeOne.deepestNode());
@@ -39,13 +42,13 @@ public class TreeTester {
 
         //Problem 4
         int mylevel=3;
-        System.out.println("Number nodes at level " + mylevel + " is " + treeThree.nodesInLevel(mylevel));
+        System.out.println("Number nodes at level " + mylevel + " is " + treeThree.nodesInLevel(mylevel, treeThree.root, 0));
         mylevel=4;
-        System.out.println("Number nodes at level " + mylevel + " is " + treeThree.nodesInLevel(mylevel));
+        System.out.println("Number nodes at level " + mylevel + " is " + treeThree.nodesInLevel(mylevel, treeThree.root, 0));
 
         //Problem 5
         System.out.println("All paths from treeThree");
-        treeThree.printAllPaths();
+        treeThree.printAllPaths(treeThree.root, "");
 
 
         Integer[] list4= {21, 8, 25, 6, 7, 19, 10, 40, 43, 52, 64, 80};
@@ -62,10 +65,10 @@ public class TreeTester {
 
         //Problem 7
         System.out.println(treeOne.toString());
-        System.out.println("treeOne Least Common Ancestor of (10,15) " + treeOne.lca(10, 15) + ENDLINE);
-        System.out.println("treeOne Least Common Ancestor of (55,61) " + treeOne.lca(55, 61) + ENDLINE);
-        System.out.println("treeOne Least Common Ancestor of (9,50) " + treeOne.lca(9, 50) + ENDLINE);
-        System.out.println("treeOne Least Common Ancestor of (29,62) " + treeOne.lca(29, 62) + ENDLINE);
+        System.out.println("treeOne Least Common Ancestor of (10,15) " + treeOne.lca(treeOne.root, 10, 15) + ENDLINE);
+        System.out.println("treeOne Least Common Ancestor of (55,61) " + treeOne.lca(treeOne.root,55, 61) + ENDLINE);
+        System.out.println("treeOne Least Common Ancestor of (9,50) " + treeOne.lca(treeOne.root,9, 50) + ENDLINE);
+        System.out.println("treeOne Least Common Ancestor of (29,62) " + treeOne.lca(treeOne.root,29, 62) + ENDLINE);
 
         //Problem 8
         Integer[] v5 = {15, 1,2,3,5,10, 65, 66,67,68,83, 70, 90,69,6,8};
@@ -85,17 +88,17 @@ public class TreeTester {
         treeFive.changeName("treeFive");
         System.out.println(treeFive.toString());
         treeFive.keepRange(3, 69);
-        treeFive.changeName("treeFive after keeping only nodes between 3  and 69");
+        treeFive.changeName("treeFive after keeping only nodes between 3 and 69");
         System.out.println(treeFive.toString());
 
         // Problem 10
         treeTwo = new Tree<Integer>(list2, "TreeTwo:", false);
         System.out.println(treeTwo.toString());
-        System.out.println("treeTwo Contains BST: " + treeTwo.countBST());
+        System.out.println("treeTwo Contains BST: " + treeTwo.countBST(treeTwo.root));
 
         treeFour = new Tree<Integer>(list4, "treeFour", false);
         System.out.println(treeFour.toString());
-        System.out.println("treeFour Contains BST: " + treeFour.countBST());
+        System.out.println("treeFour Contains BST: " + treeFour.countBST(treeFour.root));
 
         //Bonus
 
