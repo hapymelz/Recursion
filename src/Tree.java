@@ -1,9 +1,7 @@
 // ******************ERRORS********************************
 // Throws UnderflowException as appropriate
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.*;
 
 class UnderflowException extends RuntimeException {
     /**
@@ -39,8 +37,8 @@ public class Tree<E extends Comparable<? super E>> {
         treeName = label;
         if (ordered) {
             root = null;
-            for (int i = 0; i < arr.length; i++) {
-                bstInsert(arr[i]);
+            for (E e : arr) {
+                bstInsert(e);
             }
         } else root = buildUnordered(arr, 0, arr.length - 1);
     }
@@ -72,7 +70,7 @@ public class Tree<E extends Comparable<? super E>> {
 
 
     /**
-     * Return a string displaying the tree contents as a single line
+     * Return a string displaying the tree contents as a list, with height in parentheses, not used
      */
     public String toString() {
         if (root == null)
@@ -80,7 +78,7 @@ public class Tree<E extends Comparable<? super E>> {
 
         return treeName + "\n" + printTree(root, 0);
     }
-    public String printTree(BinaryNode<E> node, int height) {
+    private String printTree(BinaryNode<E> node, int height) {
         if (node == null) {
             return "";
         }
@@ -94,7 +92,7 @@ public class Tree<E extends Comparable<? super E>> {
 
 
     /**
-     * Return a string displaying the tree contents as a single line
+     * Return a string displaying the tree contents as a single line, not used
      */
     public String toString2() {
         if (root == null)
@@ -123,13 +121,18 @@ public class Tree<E extends Comparable<? super E>> {
      * values into the array, then again when you go through the array to load the values into the string.
      *
      */
+
     public String toStringReverse() {
-        ArrayList<E> nodeArr =  loadArr(root, new ArrayList<E>());
-        nodeArr.sort(Comparator.reverseOrder());
+        if (root == null)
+            return treeName + " Empty tree";
+
+        return treeName + "\n" + printTreeReverse();
+    }
+    public String printTreeReverse() {
+        ArrayList<E> nodeArr =  traverseInOrder(root, new ArrayList<E>());
         String order = "";
-        for (E item : nodeArr) {
-            System.out.print(item + ", ");
-        }
+
+        Collections.reverse(nodeArr);
 
         for (E item : nodeArr) {
             int numSpaces = getHeight(item, 0, root);
@@ -139,7 +142,7 @@ public class Tree<E extends Comparable<? super E>> {
             }
             order = order + spaces + item + "\n";
         }
-        return treeName + "\n" + order;
+        return order;
     }
     private int getHeight(E node, int height, BinaryNode<E> currNode) {
         if (currNode == null) { return 0; }
@@ -147,14 +150,17 @@ public class Tree<E extends Comparable<? super E>> {
         return getHeight(node, height + 1, currNode.left) + getHeight(node, height + 1, currNode.right);
 
     }
-    private ArrayList<E> loadArr(BinaryNode<E> node, ArrayList<E> nodeArr) {
-        if (node == null) { return nodeArr; }
-        nodeArr.add(node.element);
-        nodeArr = loadArr(node.left, nodeArr);
-        nodeArr = loadArr(node.right, nodeArr);
 
-        return nodeArr;
+    private ArrayList<E> traverseInOrder(BinaryNode<E> node, ArrayList<E> inOrder) {
+        if (node == null) { return inOrder; }
+        inOrder = loadArr(node.left, inOrder);
+        inOrder.add(node.element);
+        inOrder = loadArr(node.right, inOrder);
+
+        return inOrder;
     }
+
+
 
 
 
@@ -191,7 +197,7 @@ public class Tree<E extends Comparable<? super E>> {
 
     /** Program 3
      * The complexity of finding the deepest node is O(n)
-     * @return
+     * @return E deepest node
      */
     public E deepestNode() {
         BinaryNode<E> deepestNode =  getDeepest(root, 0, null, 0);
@@ -200,6 +206,7 @@ public class Tree<E extends Comparable<? super E>> {
     public BinaryNode<E> getDeepest(BinaryNode<E> node, int height, BinaryNode<E> deepestNode, int maxHeight) {
         if (root == null) { return deepestNode; }
         if (node == null) { return deepestNode; }
+
 
         if (height > maxHeight) {
             deepestNode = node;
@@ -243,7 +250,7 @@ public class Tree<E extends Comparable<? super E>> {
 
     /** Program 5
      * Print all paths from root to leaves
-     * The complexity of printAllPaths is O(???)
+     * The complexity of printAllPaths is O(n)
      */
     public void printAllPaths(BinaryNode<Integer> node, String path) {
         if (root == null) { return; }
@@ -263,17 +270,33 @@ public class Tree<E extends Comparable<? super E>> {
 
     /** Program 6
      * Remove all paths from tree that sum to less than given value
-     * @param sum: minimum path sum allowed in final tree
+     * The complexity of pruneK is O(n)
+     * @param k: minimum path sum allowed in final tree
      */
-    public BinaryNode<E> pruneK(BinaryNode<E> node, E k, E sum) {
+    public void pruneK(Integer k) {
+        root = (BinaryNode<E>) pruneK(new Sum(0), k, (BinaryNode<Integer>) root);
+    }
+    public BinaryNode<Integer> pruneK( Sum sum,  Integer k, BinaryNode<Integer> node) {
         if (node == null) { return null; }
 
+        Sum leftSum = new Sum(sum.s + node.element);
+        Sum rightSum = new Sum(sum.s + node.element);
 
-        int leftSum = sum + node.element;
+        node.left = pruneK(leftSum, k, node.left);
+        node.right = pruneK(rightSum, k, node.right);
 
+        sum.s = Math.max(leftSum.s, rightSum.s);
 
+        if (sum.s < k) {
+            node = null;
+        }
+
+        return node;
     }
-
+    private class Sum {
+        int s;
+        public Sum (int a) { s = a; }
+    }
 
 
 
@@ -316,14 +339,15 @@ public class Tree<E extends Comparable<? super E>> {
 
     /** Program 8
      * Balance the tree
+     * The complexity of balance tree is O(n)
      */
     public void balanceTree() {
         ArrayList<E> nodes =  loadArr(root, new ArrayList<E>());
 
         nodes.sort(Comparator.naturalOrder());
-        for (E item : nodes) {
-            System.out.println(item);
-        }
+//        for (E item : nodes) {
+//            System.out.println(item);
+//        }
 
         root = new BinaryNode<E>(nodes.get(nodes.size() / 2));
 
@@ -346,14 +370,21 @@ public class Tree<E extends Comparable<? super E>> {
     }
 
 
+    private ArrayList<E> loadArr(BinaryNode<E> node, ArrayList<E> nodeArr) {
+        if (node == null) { return nodeArr; }
+        nodeArr.add(node.element);
+        nodeArr = loadArr(node.left, nodeArr);
+        nodeArr = loadArr(node.right, nodeArr);
 
+        return nodeArr;
+    }
 
 
 
 
     /** Program 9
      * In a BST, keep only nodes between range
-     *
+     *The complexity of keepRange is O(n)
      * @param a lowest value
      * @param b highest value
      */
@@ -429,53 +460,57 @@ public class Tree<E extends Comparable<? super E>> {
      *  The complexity of countBST is O(n)
      * @return Count of embedded binary search trees
      */
-    public int countBST(BinaryNode<E> node) {
-//        BSTrees bst = countBSTrees();
-//        return bst.bstNum;
-        if (root == null) { return 0;}
-        if (node.left == null && node.right == null) { return 1;}
-
-        if (node.left == null && node.right != null) {
-            if (node.right.element.compareTo(node.element) > 0) {
-                return 1 + countBST(node.right);
-            }
-        }
-
-        else if (node.right == null && node.left != null) {
-            if (node.left.element.compareTo(node.element) < 0) {
-                return 1 + countBST(node.left);
-            }
-        }
-        else if (node.left != null && node.right != null) {
-            if (node.left.element.compareTo(node.element) < 0 && node.right.element.compareTo(node.element) > 0) {
-                return 1 + countBST(node.left) + countBST(node.right);
-            }
-        }
-
-        return countBST(node.left) + countBST(node.right);
+    public int countBST() {
+        BSTrees isBST = countBST(root);
+        return isBST.bstNum;
     }
 
-    static class BSTrees {
+    private static class BSTrees {
         int bstNum;
-        int bstMax;
-        int bstMin;
         boolean isBST;
 
-        BSTrees(int num, int max, int min, boolean bst) {
+        BSTrees() {}
+
+        BSTrees(int num, boolean bst) {
             bstNum = num;
-            bstMax = max;
-            bstMin = min;
             isBST = bst;
         }
     }
 
-//    public BSTrees countBSTrees() {
-//        if (root == null)
-//
-//
-//
-//        return bst;
-//    }
+    public BSTrees countBST(BinaryNode<E> node) {
+        if (node == null) { return new BSTrees(0, true); }
+        if (node.left == null && node.right == null) {
+            return new BSTrees(1, true);
+        }
+
+        BSTrees left = countBST(node.left);
+        BSTrees right = countBST(node.right);
+
+
+        BSTrees nodeBST = new BSTrees();
+
+        int leftElement = 0;
+        if (node.left != null) {
+            leftElement = node.element.compareTo(node.left.element);
+        }
+
+        int rightElement = 0;
+        if (node.right != null) {
+            rightElement = node.element.compareTo(node.right.element);
+        }
+
+
+        if (leftElement > 0 && rightElement < 0 && left.isBST && right.isBST) {
+            nodeBST.bstNum = 1 + left.bstNum + right.bstNum;
+            nodeBST.isBST = true;
+        }
+        else {
+            nodeBST.isBST = false;
+            nodeBST.bstNum = left.bstNum + right.bstNum;
+        }
+
+        return nodeBST;
+    }
 
 
 
@@ -484,13 +519,53 @@ public class Tree<E extends Comparable<? super E>> {
 
     /** Program 11
      * Build tree given inOrder and preOrder traversals.  Each value is unique
+     * The complexity of buildTreeTraversals is O(n)
      * @param inOrder  List of tree nodes in inorder
-     * @param preOrder List of tree nodes in preorder
+     * @param pre List of tree nodes in preorder
      */
-    public void buildTreeTraversals(BinaryNode<E> node, E[] inOrder, E[] preOrder) {
-        if (node == null) { return; }
+    public void buildTreeTraversals(E[] inOrder, E[] pre) {
+        ArrayList<E> preOrder = new ArrayList<E>(Arrays.asList(pre));
+
+        root = new BinaryNode<E>(preOrder.get(0));
+        preOrder.remove(0);
+
+        int index = indexOf(inOrder, root.element);
+
+
+        E [] left = Arrays.copyOfRange(inOrder, 0, index);
+        root.left = traverse(left, preOrder);
+
+        E [] right = Arrays.copyOfRange(inOrder, index + 1, inOrder.length);
+        root.right = traverse(right, preOrder);
 
     }
+
+    private BinaryNode<E> traverse(E[] inOrder, ArrayList<E> preOrder) {
+        if (inOrder.length == 0) { return null; }
+        BinaryNode<E> node = new BinaryNode<E>(preOrder.get(0));
+        preOrder.remove(0);
+
+        int index = indexOf(inOrder, node.element);
+
+
+        E [] left = Arrays.copyOfRange(inOrder, 0, index);
+        node.left = traverse(left, preOrder);
+
+        E [] right = Arrays.copyOfRange(inOrder, index + 1, inOrder.length);
+        node.right = traverse(right, preOrder);
+
+        return node;
+    }
+
+    private int indexOf(E[] arr, E e) {
+        for (int i = 0; i < arr.length; i ++) {
+            if (arr[i].compareTo(e) == 0) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
 
 
 
