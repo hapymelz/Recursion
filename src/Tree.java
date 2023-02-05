@@ -142,6 +142,7 @@ public class Tree<E extends Comparable<? super E>> {
             }
             order = order + spaces + item + "\n";
         }
+
         return order;
     }
     private int getHeight(E node, int height, BinaryNode<E> currNode) {
@@ -153,9 +154,9 @@ public class Tree<E extends Comparable<? super E>> {
 
     private ArrayList<E> traverseInOrder(BinaryNode<E> node, ArrayList<E> inOrder) {
         if (node == null) { return inOrder; }
-        inOrder = loadArr(node.left, inOrder);
+        inOrder = traverseInOrder(node.left, inOrder);
         inOrder.add(node.element);
-        inOrder = loadArr(node.right, inOrder);
+        inOrder = traverseInOrder(node.right, inOrder);
 
         return inOrder;
     }
@@ -274,32 +275,24 @@ public class Tree<E extends Comparable<? super E>> {
      * @param k: minimum path sum allowed in final tree
      */
     public void pruneK(Integer k) {
-        root = (BinaryNode<E>) pruneK(new Sum(0), k, (BinaryNode<Integer>) root);
+        root = (BinaryNode<E>) pruneK((BinaryNode<Integer>) root, k);
     }
-    public BinaryNode<Integer> pruneK( Sum sum,  Integer k, BinaryNode<Integer> node) {
+
+    public BinaryNode<Integer> pruneK(BinaryNode<Integer> node, int k) {
         if (node == null) { return null; }
 
-        Sum leftSum = new Sum(sum.s + node.element);
-        Sum rightSum = new Sum(sum.s + node.element);
+        k = k - node.element;
 
-        node.left = pruneK(leftSum, k, node.left);
-        node.right = pruneK(rightSum, k, node.right);
+        node.left = pruneK(node.left, k);
+        node.right = pruneK(node.right, k);
 
-        sum.s = Math.max(leftSum.s, rightSum.s);
-
-        if (sum.s < k) {
+        if (node.left == null && node.right == null && k > 0 ) {
             node = null;
         }
 
         return node;
+
     }
-    private class Sum {
-        int s;
-        public Sum (int a) { s = a; }
-    }
-
-
-
 
 
 
@@ -342,7 +335,7 @@ public class Tree<E extends Comparable<? super E>> {
      * The complexity of balance tree is O(n)
      */
     public void balanceTree() {
-        ArrayList<E> nodes =  loadArr(root, new ArrayList<E>());
+        ArrayList<E> nodes =  traversePreOrder(root, new ArrayList<E>());
 
         nodes.sort(Comparator.naturalOrder());
 //        for (E item : nodes) {
@@ -370,11 +363,11 @@ public class Tree<E extends Comparable<? super E>> {
     }
 
 
-    private ArrayList<E> loadArr(BinaryNode<E> node, ArrayList<E> nodeArr) {
+    private ArrayList<E> traversePreOrder(BinaryNode<E> node, ArrayList<E> nodeArr) {
         if (node == null) { return nodeArr; }
         nodeArr.add(node.element);
-        nodeArr = loadArr(node.left, nodeArr);
-        nodeArr = loadArr(node.right, nodeArr);
+        nodeArr = traversePreOrder(node.left, nodeArr);
+        nodeArr = traversePreOrder(node.right, nodeArr);
 
         return nodeArr;
     }
